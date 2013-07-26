@@ -1,0 +1,14 @@
+#Ignore PYC files
+*.pyc
+
+#Ignore PPT files
+*.ppt
+
+#Ignore PPT# file
+*.ppt#
+
+#Ignore vim files
+*.py.swp
+
+#Ignore filenames ending in ~
+*~
