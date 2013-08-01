@@ -31,7 +31,6 @@ class Crawler:
         self.rules = [] 
         self.add_seeds(seed)
         self.set_rules()
-        self.set_rules()
         self.url_index = deque(self.frontier)
         self.visited = []
 
@@ -48,23 +47,31 @@ class Crawler:
 
     def set_rules(self):
         """ Define rule domains """
+        import ipdb; ipdb.set_trace() # BREAKPOINT
+        
         for seed in self.frontier:
             domain = str(urlparse(seed).hostname) + str(urlparse(seed).path)
-            self.rules.append('^(http://.('+domain+')(.+)$')
+            self.rules.append('^http://'+domain+'(.*)$')
 
     def extract_url(self, html, url):
         """ Extract all URL from a page """
        
         #Extraction
         soup = BeautifulSoup(html)
-        all_links = soup.findAll("a")
+        soup.prettify()
+        for anchor in soup.findAll('a', href=True):
+            anchor = anchor['href']
+            print anchor
+            #Normalize URL
+            import ipdb; ipdb.set_trace() # BREAKPOINT
 
-        for link in all_links:
-            soup.prettify()
-            for anchor in soup.findAll('a', href=True):
-                print anchor['href']
-                #Normalize URL
+            if re.match("\/.*", anchor):
+                new_url = urlparse(url).hostname + anchor
+            elif re.match(self.rules[0], anchor) != None: #Domain Filter 
+                new_url = anchor 
 
+            #check visited
+            #if not add to the list to visit
 
 
     def start(self):
