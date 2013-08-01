@@ -19,53 +19,74 @@ import urllib2
 from urlparse import urlparse
 import getopt
 from collections import deque
+from BeautifulSoup import BeautifulSoup
+
 
 class Crawler:
     """ Class Crawler """
 
     def __init__(self, seed):
         """ Crawler Constructor """
-        self.o_seeds = [] #original seeds / Domains
+        self.frontier = None #original seeds / Domains
         self.rules = [] 
         self.add_seeds(seed)
         self.set_rules()
         self.set_rules()
-        self.frontier = deque(self.o_seeds)
+        self.url_index = deque(self.frontier)
         self.visited = []
 
     def add_seeds(self, seed):
         """ Add starting web domains """
         #TODO seed/s are web URLs
         if type(seed) == list:
-            self.o_seeds = seed
+            self.frontier = seed
         elif type(seed) == str:
-            self.o_seeds = [seed]
+            self.frontier = [seed]
         else:
             print "Incorrect type of URL seed"
             sys.exit()
 
     def set_rules(self):
         """ Define rule domains """
-        for seed in self.o_seeds:
+        for seed in self.frontier:
             domain = str(urlparse(seed).hostname) + str(urlparse(seed).path)
             self.rules.append('^(http://.('+domain+')(.+)$')
+
+    def extract_url(self, html, url):
+        """ Extract all URL from a page """
+       
+        #Extraction
+        soup = BeautifulSoup(html)
+        all_links = soup.findAll("a")
+
+        for link in all_links:
+            soup.prettify()
+            for anchor in soup.findAll('a', href=True):
+                print anchor['href']
+                #Normalize URL
+
+
 
     def start(self):
         """ Start Crawling """
         
         fetched_url = 0
-        folder_url = str(urlparse(self.o_seeds[0]).hostname)
+        folder_url = str(urlparse(self.url_index[0]).hostname)
         if not os.path.exists(folder_url):
             os.mkdir(folder_url)
-        while fetched_url < 10 and self.frontier:
+        while fetched_url < 10 and self.url_index:
             #Fetch URL
-            url = self.frontier.popleft()
+            url = self.url_index.popleft()
             print "Fetching " + url + " ..."
             req = urllib2.Request(url)
             response = urllib2.urlopen(req)
-            the_page = response.read()
-            print the_page
-
+            html = response.read()
+            print html
+            
+            import ipdb; ipdb.set_trace() # BREAKPOINT
+            self.extract_url(html, url) 
+            #import time; time.sleep(1) #Sleep 1 second
+            
             fetched_url += 1
             
 
